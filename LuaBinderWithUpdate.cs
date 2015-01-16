@@ -7,7 +7,7 @@ using LuaInterface;
 
 namespace LuaUtility
 {
-    class LuaBinderWithUpdate : LuaBinder
+    public class LuaBinderWithUpdate : LuaBinder
     {
         private LuaFunction m_callbackUpdate;
 

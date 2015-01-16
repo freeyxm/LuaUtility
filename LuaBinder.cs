@@ -7,8 +7,9 @@ using LuaInterface;
 
 namespace LuaUtility
 {
-    class LuaBinder : MonoBehaviour
+    public class LuaBinder : MonoBehaviour
     {
+        public string m_name;
         public string m_luaFile;
         public bool m_enableAwake = false;
 
@@ -27,6 +28,11 @@ namespace LuaUtility
             {
                 // If enable awake => Can't bind LuaBinder to gameObject in lua script.(Awake called befor property be setted.)
                 CallLuaFunction("LLuaBinder_Awake");
+            }
+
+            if (!string.IsNullOrEmpty(m_name))
+            {
+                LuaBinderMgr.Instance.AddObject(m_name, this);
             }
         }
 
@@ -68,11 +74,6 @@ namespace LuaUtility
         {
             LoadLua(); // if !m_enableAwake, just after Instantiate gameObject may haven't load lua!
             return m_luaHelper.CallFunctionEA(funcName, this, args);
-        }
-
-        public void RequireLua(string luaFileName)
-        {
-            m_luaHelper.DoFile(luaFileName);
         }
 
         public LuaHelper GetLuaHelper()

@@ -9,8 +9,9 @@ namespace LuaUtility
 {
     public class LuaHelper
     {
-        private LuaState m_lua = null;
-        private bool m_useGlobal = false;
+        private LuaState m_lua;
+        private bool m_useGlobal;
+        private Dictionary<string, bool> m_loadedFiles;
 
         public LuaHelper(bool _useGlobal)
         {
@@ -19,6 +20,13 @@ namespace LuaUtility
                 m_lua = LuaManager.GetSingleton().GetLua();
             else
                 m_lua = new LuaState();
+            m_loadedFiles = new Dictionary<string, bool>();
+            RegisterFunctions();
+        }
+
+        void RegisterFunctions()
+        {
+            RegisterFunction("RequireLua", this, this.GetType().GetMethod("RequireLua"));
         }
 
         public void RegisterFunction(string path, object target, System.Reflection.MethodBase function)
@@ -31,9 +39,38 @@ namespace LuaUtility
             return m_lua.DoString(chunk);
         }
 
+        public void DoFile(string fileName, bool reloadFlag)
+        {
+            if (!m_loadedFiles.ContainsKey(fileName))
+            {
+                LuaManager.DoFile(m_lua, fileName);
+                m_loadedFiles.Add(fileName, true);
+            }
+            else if (reloadFlag)
+            {
+                LuaManager.DoFile(m_lua, fileName);
+            }
+        }
+
         public void DoFile(string fileName)
         {
-            LuaManager.DoFile(m_lua, fileName);
+            DoFile(fileName, false);
+        }
+
+        public void RequireLua(string luaFileName)
+        {
+            DoFile(luaFileName, false);
+        }
+
+        public static LuaBinder GetLuaBinder(GameObject go, string name)
+        {
+            LuaBinder[] result = go.GetComponents<LuaBinder>();
+            for (int i = 0; i < result.Length; ++i)
+            {
+                if (result[i].m_name.Equals(name))
+                    return result[i];
+            }
+            return null;
         }
 
         public object[] CallFunction(string funcName, params object[] args)

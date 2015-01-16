@@ -38,6 +38,11 @@ namespace LuaUtility
             m_allowDuplicate = allow;
         }
 
+        public static T Get(string key)
+        {
+            return Instance.GetObject(key);
+        }
+
         public T GetObject(string key)
         {
             if (m_container.ContainsKey(key))
