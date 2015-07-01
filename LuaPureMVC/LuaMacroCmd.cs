@@ -26,11 +26,6 @@ namespace LuaUtility.LuaPureMVC
         {
         }
 
-        public void AddSubCommand(ICommand command)
-        {
-            base.AddSubCommand(command);
-        }
-
         // open Facade for script use.
         public new IFacade Facade
         {

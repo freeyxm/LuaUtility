@@ -42,7 +42,7 @@ namespace WPFLuaFramework
             }
             catch (Exception e)
             {
-                UnityEngine.Debug.LogError(e.ToString());
+                Debuger.LogError(e.ToString());
             }
         }
 
@@ -58,7 +58,7 @@ namespace WPFLuaFramework
             }
             catch (Exception e)
             {
-                UnityEngine.Debug.LogError(e.ToString());
+                Debuger.LogError(e.ToString());
             }
         }
     }

@@ -11,24 +11,17 @@ namespace LuaUtility
     {
         public string m_name;
         public string m_luaFile;
-        public bool m_enableAwake = false;
 
         protected LuaHelper m_luaHelper;
         private Dictionary<string, object> m_objects;
         private bool m_luaLoaded = false;
 
-        void Awake()
+        void Init()
         {
             m_objects = new Dictionary<string, object>();
-            m_luaHelper = new LuaHelper(false); // It's important to use a non global lua state, or lua function belong to diff script will confused.
+            m_luaHelper = new LuaHelper(false); // It's important to use a non global lua state, or lua function belong to different script will confused.
 
-            RegisterFunctions();
-
-            if (m_enableAwake)
-            {
-                // If enable awake => Can't bind LuaBinder to gameObject in lua script.(Awake called befor property be setted.)
-                CallLuaFunction("LLuaBinder_Awake");
-            }
+            RegisterAttributes();
 
             if (!string.IsNullOrEmpty(m_name))
             {
@@ -36,24 +29,34 @@ namespace LuaUtility
             }
         }
 
-        void Start()
+        void Awake()
         {
-            CallLuaFunction("LLuaBinder_Start");
+            // Can't bind LuaBinder to gameObject in lua script --> Awake called befor property be setted.
+            Init();
+            
+            LoadLua();
+
+            CallLuaFunction("Awake");
         }
 
-        void Destroy()
+        void Start()
         {
-            CallLuaFunction("LLuaBinder_Destroy");
+            CallLuaFunction("Start");
+        }
+
+        void OnDestroy()
+        {
+            CallLuaFunction("OnDestroy");
         }
 
         void OnEnable()
         {
-            CallLuaFunction("LLuaBinder_OnEnable");
+            CallLuaFunction("OnEnable");
         }
 
         void OnDisable()
         {
-            CallLuaFunction("LLuaBinder_OnDisable");
+            CallLuaFunction("OnDisable");
         }
 
         void LoadLua()
@@ -65,15 +68,16 @@ namespace LuaUtility
             }
         }
 
-        protected virtual void RegisterFunctions()
+        void RegisterAttributes()
         {
-            //mLuaHelper.RegisterFunction("LLuaBinder_XXX", this, this.GetType().GetMethod("XXX"));
+            m_luaHelper.RegisterAttribute("gameObject", gameObject);
+            m_luaHelper.RegisterAttribute("transform", transform);
+            m_luaHelper.RegisterAttribute("this", this);
         }
 
         public object[] CallLuaFunction(string funcName, params object[] args)
         {
-            LoadLua(); // if !m_enableAwake, just after Instantiate gameObject may haven't load lua!
-            return m_luaHelper.CallFunctionEA(funcName, this, args);
+            return m_luaHelper.CallFunction(funcName, args);
         }
 
         public LuaHelper GetLuaHelper()

@@ -54,7 +54,7 @@ namespace LuaUtility.LuaPureMVC
             get
             {
                 IList<string> list = base.ListNotificationInterests;
-                List<string>.Enumerator e = m_notifications.GetEnumerator();
+                IEnumerator<string> e = m_notifications.GetEnumerator();
                 while (e.MoveNext())
                 {
                     list.Add(e.Current);

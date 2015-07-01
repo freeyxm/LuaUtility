@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -11,7 +11,8 @@ namespace LuaUtility
     {
         private LuaState m_lua;
         private bool m_useGlobal;
-        private Dictionary<string, bool> m_loadedFiles;
+        private Dictionary<string, bool> m_loadedFiles = new Dictionary<string,bool>();
+        private Dictionary<string, LuaFunction> m_functions = new Dictionary<string, LuaFunction>();
 
         public LuaHelper(bool _useGlobal)
         {
@@ -20,7 +21,7 @@ namespace LuaUtility
                 m_lua = LuaManager.GetSingleton().GetLua();
             else
                 m_lua = new LuaState();
-            m_loadedFiles = new Dictionary<string, bool>();
+
             RegisterFunctions();
         }
 
@@ -34,6 +35,11 @@ namespace LuaUtility
             m_lua.RegisterFunction(path, target, function);
         }
 
+        public void RegisterAttribute(string key, object value)
+        {
+            m_lua[key] = value;
+        }
+
         public object[] DoString(string chunk)
         {
             return m_lua.DoString(chunk);
@@ -43,12 +49,12 @@ namespace LuaUtility
         {
             if (!m_loadedFiles.ContainsKey(fileName))
             {
-                LuaManager.DoFile(m_lua, fileName);
+				LuaManager.DoCodeFile(m_lua, fileName);
                 m_loadedFiles.Add(fileName, true);
             }
             else if (reloadFlag)
             {
-                LuaManager.DoFile(m_lua, fileName);
+				LuaManager.DoCodeFile(m_lua, fileName);
             }
         }
 
@@ -62,24 +68,22 @@ namespace LuaUtility
             DoFile(luaFileName, false);
         }
 
-        public static LuaBinder GetLuaBinder(GameObject go, string name)
-        {
-            LuaBinder[] result = go.GetComponents<LuaBinder>();
-            for (int i = 0; i < result.Length; ++i)
-            {
-                if (result[i].m_name.Equals(name))
-                    return result[i];
-            }
-            return null;
-        }
-
         public object[] CallFunction(string funcName, params object[] args)
         {
-            LuaFunction func = m_lua.GetFunction(funcName);
-            if (func != null)
-                return func.Call(args);
+            if (m_functions.ContainsKey(funcName))
+            {
+                return m_functions[funcName].Call(args);
+            }
             else
-                return null;
+            {
+                LuaFunction func = m_lua.GetFunction(funcName);
+                if (func != null)
+                {
+                    m_functions.Add(funcName, func);
+                    return func.Call(args);
+                }
+            }
+            return null;
         }
 
         /// <summary>
@@ -88,7 +92,18 @@ namespace LuaUtility
         /// </summary>
         public object[] CallFunctionEA(string funcName, params object[] args)
         {
-            LuaFunction func = m_lua.GetFunction(funcName);
+            LuaFunction func;
+            if (m_functions.ContainsKey(funcName))
+            {
+                func = m_functions[funcName];
+            }
+            else
+            {
+                func = m_lua.GetFunction(funcName);
+                if (func != null)
+                    m_functions.Add(funcName, func);
+            }
+
             if (func == null)
                 return null;
             else if (args == null || args.Length <= 1 || !(args[args.Length - 1] is Array))
@@ -109,9 +124,9 @@ namespace LuaUtility
             }
         }
 
-        public static Action Action(LuaFunction func, params object[] args)
+        public static System.Action Action(LuaFunction func, params object[] args)
         {
-            Action action = () =>
+            System.Action action = () =>
                 {
                     func.Call(args);
                 };

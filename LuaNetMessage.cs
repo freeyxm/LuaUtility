@@ -12,7 +12,7 @@ namespace LuaUtility
 
         public LuaNetMessage(string channel, int code, byte[] data, LuaFunction cbFunc)
         {
-            Init(channel, code);
+            Init(channel, code, ProcessResult, ProcessError);
             mData = data;
             mCallbackFunc = cbFunc;
         }
@@ -22,14 +22,15 @@ namespace LuaUtility
             return mData;
         }
 
-        public override void ProcessErr()
+        void ProcessError(NetMessageBase nm)
         {
-            throw new System.NotImplementedException("LuaProtocol: errcode = " + State);
+            throw new System.Exception("LuaNetMessage: errcode = " + nm.State);
         }
 
-        protected override void ProcessResult(byte[] data)
+        void ProcessResult(byte[] data)
         {
-            mCallbackFunc.Call(data);
+            if (mCallbackFunc != null)
+                mCallbackFunc.Call(data);
         }
     }
 }

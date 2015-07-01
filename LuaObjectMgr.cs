@@ -43,6 +43,11 @@ namespace LuaUtility
             return Instance.GetObject(key);
         }
 
+        public bool Contains(string key)
+        {
+            return m_container.ContainsKey(key);
+        }
+
         public T GetObject(string key)
         {
             if (m_container.ContainsKey(key))
