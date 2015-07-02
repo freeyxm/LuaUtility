@@ -115,8 +115,6 @@ namespace LuaUtility
         {
             if (!m_luaLoaded && !string.IsNullOrEmpty(m_luaFile))
             {
-                m_luaHelper.DoFile("CommonImport.lua");
-
                 //StringBuilder buff = new StringBuilder();
                 //buff.Append(UIName).Append(" = {};").AppendLine();
                 //buff.Append("function ").Append(UIName).Append(":new()").AppendLine();

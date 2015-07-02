@@ -1,0 +1,11 @@
+luanet.load_assembly('UnityEngine')
+luanet.load_assembly('UnityDebugger')
+luanet.load_assembly('Assembly-CSharp')
+
+GameObject = luanet.import_type('UnityEngine.GameObject')
+Transform = luanet.import_type('UnityEngine.Transform')
+
+LuaHelper = luanet.import_type('LuaUtility.LuaHelper')
+LuaBinder = luanet.import_type('LuaUtility.LuaBinder')
+
+Debug = luanet.import_type('Debuger')

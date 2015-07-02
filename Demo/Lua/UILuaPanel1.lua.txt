@@ -1,0 +1,44 @@
+UIPanelManager = luanet.import_type('UIPanelManager')
+GameManager = luanet.import_type('GameManager')
+UIEventListener = luanet.import_type('UIEventListener')
+EventDelegate = luanet.import_type('EventDelegate')
+
+RequireLua("CommonImport.lua");
+
+UI = {};
+UI.Notify = {};
+UI.Notify.Change_Text = "Change_Text";
+
+function Awake()
+	UI.btnClose = this:GetObject("BtnClose"):GetComponent("UIButton");
+	UI.btnConfirm = this:GetObject("BtnConfirm"):GetComponent("UIButton");
+	UI.txtDesc = this:GetObject("Label_desc"):GetComponent("UILabel");
+
+	UIEventListener.Get(UI.btnClose.gameObject).onClick = LuaHelper.VoidDelegate(UI.OnClickClose, 0);
+	UIEventListener.Get(UI.btnConfirm.gameObject).onClick = LuaHelper.VoidDelegate(UI.OnClickConfirm, 0);
+end
+
+function Start()
+	Debug.Log("Start: "..this:GetInstanceID()..", name = "..gameObject.name);
+end
+
+function Mediator_Init(mediator)
+	mediator:AddNotify(UI.Notify.Change_Text);
+end
+
+function Mediator_HandleNotification(key, body)
+	Debug.Log("Mediator_HandleNotification: "..key.." -> "..body);
+	if key == UI.Notify.Change_Text then
+		UI.txtDesc.text = body;
+	end
+end
+
+function UI:OnClickClose()
+	Debug.Log("OnClickClose");
+	UIPanelManager.Instance:CloseUI(this.UIName);
+end
+
+function UI:OnClickConfirm()
+	Debug.Log("OnClickConfirm");
+	this:SendNotification(UI.Notify.Change_Text, "kkk")
+end
