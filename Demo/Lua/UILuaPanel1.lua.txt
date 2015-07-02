@@ -17,9 +17,9 @@ function Awake()
 	UI.btnCancel = this:GetObject("BtnCancel"):GetComponent("UIButton");
 	UI.txtDesc = this:GetObject("Label_desc"):GetComponent("UILabel");
 
-	UIEventListener.Get(UI.btnClose.gameObject).onClick = LuaHelper.VoidDelegate(UI.OnClickClose, 0);
-	UIEventListener.Get(UI.btnConfirm.gameObject).onClick = LuaHelper.VoidDelegate(UI.OnClickConfirm, 0);
-	UIEventListener.Get(UI.btnCancel.gameObject).onClick = LuaHelper.VoidDelegate(UI.OnClickCancel, 0);
+	UIEventListener.Get(UI.btnClose.gameObject).onClick = LuaHelper.VoidDelegate(UI.OnClickClose);
+	UIEventListener.Get(UI.btnConfirm.gameObject).onClick = LuaHelper.VoidDelegate(UI.OnClickConfirm);
+	UIEventListener.Get(UI.btnCancel.gameObject).onClick = LuaHelper.VoidDelegate(UI.OnClickCancel);
 end
 
 function Start()

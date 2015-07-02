@@ -124,12 +124,30 @@ namespace LuaUtility
             }
         }
 
+        public static System.Action Action(LuaFunction func)
+        {
+            System.Action action = () =>
+            {
+                func.Call();
+            };
+            return action;
+        }
+
         public static System.Action Action(LuaFunction func, params object[] args)
         {
             System.Action action = () =>
                 {
                     func.Call(args);
                 };
+            return action;
+        }
+
+        public static UIEventListener.VoidDelegate VoidDelegate(LuaFunction func)
+        {
+            UIEventListener.VoidDelegate action = (go) =>
+            {
+                func.Call();
+            };
             return action;
         }
 
