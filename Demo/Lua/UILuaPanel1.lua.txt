@@ -4,6 +4,8 @@ UIEventListener = luanet.import_type('UIEventListener')
 EventDelegate = luanet.import_type('EventDelegate')
 
 RequireLua("CommonImport.lua");
+RequireLua("Handler/IPlayerHandler.lua");
+RequireLua("Handler/IArenaHandler.lua");
 
 UI = {};
 UI.Notify = {};
@@ -12,10 +14,12 @@ UI.Notify.Change_Text = "Change_Text";
 function Awake()
 	UI.btnClose = this:GetObject("BtnClose"):GetComponent("UIButton");
 	UI.btnConfirm = this:GetObject("BtnConfirm"):GetComponent("UIButton");
+	UI.btnCancel = this:GetObject("BtnCancel"):GetComponent("UIButton");
 	UI.txtDesc = this:GetObject("Label_desc"):GetComponent("UILabel");
 
 	UIEventListener.Get(UI.btnClose.gameObject).onClick = LuaHelper.VoidDelegate(UI.OnClickClose, 0);
 	UIEventListener.Get(UI.btnConfirm.gameObject).onClick = LuaHelper.VoidDelegate(UI.OnClickConfirm, 0);
+	UIEventListener.Get(UI.btnCancel.gameObject).onClick = LuaHelper.VoidDelegate(UI.OnClickCancel, 0);
 end
 
 function Start()
@@ -40,5 +44,23 @@ end
 
 function UI:OnClickConfirm()
 	Debug.Log("OnClickConfirm");
-	this:SendNotification(UI.Notify.Change_Text, "kkk")
+	this:SendNotification(UI.Notify.Change_Text, "OnClickConfirm")
+end
+
+function UI:OnClickCancel()
+	Debug.Log("OnClickCancel");
+	UI:getPvp();
+end
+
+function UI:getPvp()
+	local args = {};
+	args.type = 1;
+	IArenaHandler:GetArenaChallengers(args, UI.getPvpCallback);
+end
+
+function UI:getPvpCallback(infor)
+	Debug.Log("enterGameCallback: ");
+	Debug.Log(infor);
+
+	Debug.Log(Table2String(infor));
 end

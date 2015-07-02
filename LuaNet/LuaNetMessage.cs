@@ -7,19 +7,24 @@ namespace LuaUtility
 {
     class LuaNetMessage : NetMessageBase
     {
-        private byte[] mData;
-        private LuaFunction mCallbackFunc;
+        private byte[] m_sendData;
+        private LuaFunction m_callback;
 
-        public LuaNetMessage(string channel, int code, byte[] data, LuaFunction cbFunc)
+        public LuaNetMessage(string channel, int code, byte[] data, LuaFunction callback)
         {
             Init(channel, code, ProcessResult, ProcessError);
-            mData = data;
-            mCallbackFunc = cbFunc;
+            m_sendData = data;
+            m_callback = callback;
+        }
+
+        public LuaNetMessage(int code, byte[] data, LuaFunction callback)
+            : this(ProjectDefine.NET_CHANNEL_SHORTCONN, code, data, callback)
+        {
         }
 
         public override byte[] GetSendData()
         {
-            return mData;
+            return m_sendData;
         }
 
         void ProcessError(NetMessageBase nm)
@@ -29,8 +34,8 @@ namespace LuaUtility
 
         void ProcessResult(byte[] data)
         {
-            if (mCallbackFunc != null)
-                mCallbackFunc.Call(data);
+            if (m_callback != null)
+                m_callback.Call(data);
         }
     }
 }

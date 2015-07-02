@@ -1,0 +1,38 @@
+
+function Table2String(lua_table, indent)
+	if lua_table == nil then
+		return "";
+	end
+	if type(lua_table) ~= "table" then
+		return tostring(lua_table);
+	end
+	
+	local resStr = "";
+	indent = indent or 0
+	local prefix = string.rep("    ", indent);
+
+	for k,v in pairs(lua_table) do
+		if type(k) == "string" then
+			k = string.format("%q", k);
+		else
+			k = tostring(k);
+		end
+
+		local str = prefix .. "[" .. k .. "]" .. " = ";
+
+		if type(v) == "table" then
+			resStr = resStr .. str .. "{\n";
+			resStr = resStr .. Table2String(v, indent+1);
+			resStr = resStr .. prefix .. "},\n";
+		else
+			if type(v) == "string" then
+				v = string.format("%q", v);
+			else
+				v = tostring(v);
+			end
+			resStr = resStr .. str .. v .. ",\n";
+		end
+	end
+
+	return resStr;
+end

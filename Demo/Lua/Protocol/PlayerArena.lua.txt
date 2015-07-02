@@ -1,0 +1,36 @@
+ByteStreamWriter = luanet.import_type('UNetPkg.ByteStreamWriter')
+ByteStreamReader = luanet.import_type('UNetPkg.ByteStreamReader')
+NetManager = luanet.import_type('UNetPkg.NetManager')
+UNetUtility = luanet.import_type('UNetPkg.UNetUtility')
+LuaNetMessage = luanet.import_type('LuaUtility.LuaNetMessage')
+
+PlayerArena = {};
+
+function PlayerArena:new()
+	local o = {};
+	setmetatable(o, self);
+	self.__index = self;
+	return o;
+end
+
+function PlayerArena:ToStruct(data)
+	local bsr = ByteStreamReader(data);
+	self:ToStructReader(bsr);
+	bsr:Dispose();
+end
+
+function PlayerArena:ToStructReader(bsr)
+	self.rank = bsr:ReadInt();
+    self.id = bsr:ReadInt();
+    self.sign = bsr:ReadUTF8WithLength();
+    self.level = bsr:ReadInt();
+    self.gender = bsr:ReadByte();
+    self.power = bsr:ReadInt();
+    self.hasFight = bsr:ReadBool();
+    self.headIconId = bsr:ReadInt();
+    self.militaryRankPoint = bsr:ReadInt();
+    self.vip = bsr:ReadInt();
+    self.weeklyArenaPoint = bsr:ReadInt();
+    self.star = bsr:ReadInt();
+end
+
