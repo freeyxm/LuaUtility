@@ -1,7 +1,6 @@
 ByteStreamWriter = luanet.import_type('UNetPkg.ByteStreamWriter')
 ByteStreamReader = luanet.import_type('UNetPkg.ByteStreamReader')
 NetManager = luanet.import_type('UNetPkg.NetManager')
-UNetUtility = luanet.import_type('UNetPkg.UNetUtility')
 LuaNetMessage = luanet.import_type('LuaUtility.LuaNetMessage')
 
 RequireLua("Protocol/PlayerArena.lua");

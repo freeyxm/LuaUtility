@@ -1,7 +1,6 @@
 ByteStreamWriter = luanet.import_type('UNetPkg.ByteStreamWriter')
 ByteStreamReader = luanet.import_type('UNetPkg.ByteStreamReader')
 NetManager = luanet.import_type('UNetPkg.NetManager')
-UNetUtility = luanet.import_type('UNetPkg.UNetUtility')
 LuaNetMessage = luanet.import_type('LuaUtility.LuaNetMessage')
 
 RequireLua("Protocol/PlayerArenas.lua");
@@ -21,7 +20,7 @@ function IArenaHandler:GetArenaChallengers(args, callback)
 	local msg = LuaNetMessage(code, data, function(rdata)
 		local infor = PlayerArenas:new();
 		infor:ToStruct(rdata);
-		UI:getPvpCallback(infor);
+		callback(nil, infor);  -- the first arg will lost in callback. i don't know why, so use a nil placeholder.
 	end);
 	NetManager.Instance:AddNetMessage(msg);
 end
