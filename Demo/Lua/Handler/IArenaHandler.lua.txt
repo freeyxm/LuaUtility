@@ -20,7 +20,7 @@ function IArenaHandler:GetArenaChallengers(args, callback)
 	local msg = LuaNetMessage(code, data, function(rdata)
 		local infor = PlayerArenas:new();
 		infor:ToStruct(rdata);
-		callback(nil, infor);  -- the first arg will lost in callback. i don't know why, so use a nil placeholder.
+		callback(infor);
 	end);
 	NetManager.Instance:AddNetMessage(msg);
 end

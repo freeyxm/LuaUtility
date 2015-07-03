@@ -37,28 +37,28 @@ function Mediator_HandleNotification(key, body)
 	end
 end
 
-function UI:OnClickClose()
+function UI.OnClickClose()
 	Debug.Log("OnClickClose");
 	UIPanelManager.Instance:CloseUI(this.UIName);
 end
 
-function UI:OnClickConfirm()
+function UI.OnClickConfirm()
 	Debug.Log("OnClickConfirm");
 	this:SendNotification(UI.Notify.Change_Text, "OnClickConfirm")
 end
 
-function UI:OnClickCancel()
+function UI.OnClickCancel()
 	Debug.Log("OnClickCancel");
 	UI:getPvp();
 end
 
-function UI:getPvp()
+function UI.getPvp()
 	local args = {};
 	args.type = 1;
 	IArenaHandler:GetArenaChallengers(args, UI.getPvpCallback);
 end
 
-function UI:getPvpCallback(infor)
+function UI.getPvpCallback(infor)
 	Debug.Log("enterGameCallback: ");
 	Debug.Log(infor);
 
