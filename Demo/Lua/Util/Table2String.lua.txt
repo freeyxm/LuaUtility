@@ -1,38 +1,50 @@
 
-function Table2String(lua_table, indent)
+local function _Table2String(lua_table, indent, resStr)
 	if lua_table == nil then
-		return "";
+		return;
 	end
-	if type(lua_table) ~= "table" then
-		return tostring(lua_table);
-	end
-	
-	local resStr = "";
+
+	resStr = resStr or {};
 	indent = indent or 0
 	local prefix = string.rep("    ", indent);
+
+	if type(lua_table) ~= "table" then
+		if type(lua_table) == "string" then
+			lua_table = string.format("%q", lua_table);
+		end
+		resStr[#resStr + 1] = prefix;
+		resStr[#resStr + 1] = tostring(lua_table);
+		resStr[#resStr + 1] = ",\n";
+		return;
+	end
 
 	for k,v in pairs(lua_table) do
 		if type(k) == "string" then
 			k = string.format("%q", k);
-		else
-			k = tostring(k);
 		end
 
-		local str = prefix .. "[" .. k .. "]" .. " = ";
+		resStr[#resStr + 1] = prefix;
+		resStr[#resStr + 1] = "[";
+		resStr[#resStr + 1] = tostring(k);
+		resStr[#resStr + 1] = "] = ";
 
 		if type(v) == "table" then
-			resStr = resStr .. str .. "{\n";
-			resStr = resStr .. Table2String(v, indent+1);
-			resStr = resStr .. prefix .. "},\n";
+			resStr[#resStr + 1] = "{\n";
+			_Table2String(v, indent+1, resStr);
+			resStr[#resStr + 1] = prefix;
+			resStr[#resStr + 1] = "},\n";
 		else
 			if type(v) == "string" then
 				v = string.format("%q", v);
-			else
-				v = tostring(v);
 			end
-			resStr = resStr .. str .. v .. ",\n";
+			resStr[#resStr + 1] = tostring(v);
+			resStr[#resStr + 1] = ",\n";
 		end
 	end
+end
 
-	return resStr;
+function Table2String(lua_table, indent)
+	local resStr = {};
+	_Table2String(lua_table, indent, resStr);
+	return table.concat(resStr);
 end

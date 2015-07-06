@@ -39,7 +39,7 @@ end
 
 function UI.OnClickClose()
 	Debug.Log("OnClickClose");
-	UIPanelManager.Instance:CloseUI(this.UIName);
+	UIPanelManager.Instance:RemoveUI(this.UIName);
 end
 
 function UI.OnClickConfirm()
