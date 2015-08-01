@@ -10,19 +10,22 @@ namespace LuaUtility
     public class LuaHelper
     {
         private LuaState m_lua;
-        private bool m_useGlobal;
         private Dictionary<string, bool> m_loadedFiles = new Dictionary<string,bool>();
         private Dictionary<string, LuaFunction> m_functions = new Dictionary<string, LuaFunction>();
 
-        public LuaHelper(bool _useGlobal)
+        public LuaHelper(bool useGlobal)
         {
-            m_useGlobal = _useGlobal;
-            if (m_useGlobal)
+            if (useGlobal)
                 m_lua = LuaManager.GetSingleton().GetLua();
             else
                 m_lua = new LuaState();
 
             RegisterFunctions();
+        }
+
+        public LuaHelper(LuaState lua)
+        {
+            m_lua = lua;
         }
 
         void RegisterFunctions()
@@ -40,27 +43,35 @@ namespace LuaUtility
             m_lua[key] = value;
         }
 
+        public object GetAttribute(string key)
+        {
+            return m_lua[key];
+        }
+
         public object[] DoString(string chunk)
         {
             return m_lua.DoString(chunk);
         }
 
-        public void DoFile(string fileName, bool reloadFlag)
+        public bool DoFile(string fileName, bool reloadFlag)
         {
             if (!m_loadedFiles.ContainsKey(fileName))
             {
 				LuaManager.DoCodeFile(m_lua, fileName);
                 m_loadedFiles.Add(fileName, true);
+                return true;
             }
             else if (reloadFlag)
             {
 				LuaManager.DoCodeFile(m_lua, fileName);
+                return true;
             }
+            return false;
         }
 
-        public void DoFile(string fileName)
+        public bool DoFile(string fileName)
         {
-            DoFile(fileName, false);
+            return DoFile(fileName, false);
         }
 
         public void RequireLua(string luaFileName)
@@ -68,11 +79,24 @@ namespace LuaUtility
             DoFile(luaFileName, false);
         }
 
-        public object[] CallFunction(string funcName, params object[] args)
+        public void CreateClassNewFunc(string className)
+        {
+            StringBuilder buff = new StringBuilder();
+            //buff.Append(className).Append(" = {};").AppendLine();
+            buff.Append("function ").Append(className).Append(":new()").AppendLine();
+            buff.Append("    local o = {};").AppendLine();
+            buff.Append("    setmetatable(o, self);").AppendLine();
+            buff.Append("    self.__index = self;").AppendLine();
+            buff.Append("    return o;").AppendLine();
+            buff.Append("end").AppendLine();
+            DoString(buff.ToString());
+        }
+
+        public LuaFunction GetFunction(string funcName)
         {
             if (m_functions.ContainsKey(funcName))
             {
-                return m_functions[funcName].Call(args);
+                return m_functions[funcName];
             }
             else
             {
@@ -80,10 +104,15 @@ namespace LuaUtility
                 if (func != null)
                 {
                     m_functions.Add(funcName, func);
-                    return func.Call(args);
                 }
+                return func;
             }
-            return null;
+        }
+
+        public object[] CallFunction(string funcName, params object[] args)
+        {
+            LuaFunction func = GetFunction(funcName);
+            return func != null ? func.Call(args) : null;
         }
 
         /// <summary>
@@ -92,18 +121,7 @@ namespace LuaUtility
         /// </summary>
         public object[] CallFunctionEA(string funcName, params object[] args)
         {
-            LuaFunction func;
-            if (m_functions.ContainsKey(funcName))
-            {
-                func = m_functions[funcName];
-            }
-            else
-            {
-                func = m_lua.GetFunction(funcName);
-                if (func != null)
-                    m_functions.Add(funcName, func);
-            }
-
+            LuaFunction func = GetFunction(funcName);
             if (func == null)
                 return null;
             else if (args == null || args.Length <= 1 || !(args[args.Length - 1] is Array))
@@ -175,6 +193,20 @@ namespace LuaUtility
             if (component == null)
                 throw new Exception("FindComponent: component not exist. " + go.name + " -> " + name + " -> " + compType);
             return component;
+        }
+
+        public static LuaBinder GetLuaBinder(GameObject obj, string name)
+        {
+            LuaBinder[] comps = obj.GetComponents<LuaBinder>();
+
+            for (int i = 0; i < comps.Length; ++i)
+            {
+                if (comps[i].m_name.Equals(name))
+                    return comps[i];
+            }
+
+            Debuger.LogError(string.Format("GetLuaBinder failed. obj = {0}, name = {1}", obj.name, name));
+            return null;
         }
 
         public static List<object> CreateList()

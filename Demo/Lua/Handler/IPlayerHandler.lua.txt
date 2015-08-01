@@ -1,0 +1,34 @@
+ByteStreamWriter = luanet.import_type('UNetPkg.ByteStreamWriter')
+ByteStreamReader = luanet.import_type('UNetPkg.ByteStreamReader')
+NetManager = luanet.import_type('UNetPkg.NetManager')
+LuaNetMessage = luanet.import_type('LuaUtility.LuaNetMessage')
+
+RequireLua("Protocol/Player.lua");
+
+IPlayerHandler = {};
+
+-- args.equipmentMD5 - string
+-- args.skillpartMD5 - string
+-- args.achivementMD5 - string
+-- args.passiveSkillMD5 - string
+-- args.newhandMD5 - string
+-- callback: callback function.
+function IPlayerHandler:enterGame(args, callback)
+	local code = 11000;
+	local bsw = ByteStreamWriter();
+	bsw:WriteInt(code);
+	bsw:WriteUTF8WithLength(args.equipmentMD5);
+	bsw:WriteUTF8WithLength(args.skillpartMD5);
+	bsw:WriteUTF8WithLength(args.achivementMD5);
+	bsw:WriteUTF8WithLength(args.passiveSkillMD5);
+	bsw:WriteUTF8WithLength(args.newhandMD5);
+	local data = bsw:GetBuffer();
+	bsw:Dispose();
+	
+	local msg = LuaNetMessage(code, data, function(rdata)
+		local infor = Player:new();
+		infor:ToStruct(rdata);
+		callback(infor);
+	end);
+	NetManager.Instance:AddNetMessage(msg);
+end

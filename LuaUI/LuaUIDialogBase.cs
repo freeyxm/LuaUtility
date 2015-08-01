@@ -11,19 +11,46 @@ namespace LuaUtility
     {
         public string UIName = "LuaUIDialogBase";
         public string m_luaFile;
+        public MonoBehaviour m_parentBinder; // 当绑定了该值时，此实例将共享m_parentBinder的Lua虚拟机。
         public GameObject[] m_gameObjects;
 
         protected LuaHelper m_luaHelper;
         private Dictionary<string, object> m_objects;
         private bool m_luaLoaded = false;
 
+        protected string m_luaInstanceName;
+        protected object m_luaInstance;
+
         void Initialize()
         {
-            m_luaHelper = new LuaHelper(false); // It's important to use a non global lua state, or lua function belong to different script will confused.
+            m_luaInstanceName = UIName;
+
+            m_luaHelper = null;
+            if (m_parentBinder != null)
+            {
+                do
+                {
+                    // 由于C#没有多重继承，LuaBinder与LuaUIDialogBase不能实现为继承关系，只能逐一判断类型。
+                    LuaBinder binder = m_parentBinder as LuaBinder;
+                    if (binder != null)
+                    {
+                        m_luaHelper = binder.GetLuaHelper();
+                        break;
+                    }
+                    LuaUIDialogBase dialog = m_parentBinder as LuaUIDialogBase;
+                    if (dialog != null)
+                    {
+                        m_luaHelper = dialog.GetLuaHelper();
+                        break;
+                    }
+                } while (false);
+            }
+            if (m_luaHelper == null)
+            {
+                m_luaHelper = new LuaHelper(false);
+            }
+
             m_objects = new Dictionary<string, object>();
-
-            RegisterAttributes();
-
             for (int i = 0; i < m_gameObjects.Length; ++i)
             {
                 GameObject gameObject = m_gameObjects[i];
@@ -115,36 +142,54 @@ namespace LuaUtility
         {
             if (!m_luaLoaded && !string.IsNullOrEmpty(m_luaFile))
             {
-                //StringBuilder buff = new StringBuilder();
-                //buff.Append(UIName).Append(" = {};").AppendLine();
-                //buff.Append("function ").Append(UIName).Append(":new()").AppendLine();
-                //buff.Append("    local o = {};").AppendLine();
-                //buff.Append("    setmetatable(o, self);").AppendLine();
-                //buff.Append("    self.__index = self;").AppendLine();
-                //buff.Append("    return o;").AppendLine();
-                //buff.Append("end").AppendLine();
-                //m_luaHelper.DoString(buff.ToString());
-
                 m_luaHelper.DoFile(m_luaFile);
+
+                m_luaInstance = m_luaHelper.GetAttribute(m_luaInstanceName);
+
+                RegisterAttributes();
+
                 m_luaLoaded = true;
             }
         }
 
         void RegisterAttributes()
         {
-            m_luaHelper.RegisterAttribute("gameObject", gameObject);
-            m_luaHelper.RegisterAttribute("transform", transform);
-            m_luaHelper.RegisterAttribute("this", this);
+            RegisterAttribute("gameObject", gameObject);
+            RegisterAttribute("transform", transform);
+            RegisterAttribute("binder", this);
+        }
+
+        void RegisterAttribute(string name, object value)
+        {
+            m_luaHelper.RegisterAttribute(string.Format("{0}.{1}", m_luaInstanceName, name), value);
         }
 
         public object[] CallLuaFunction(string funcName, params object[] args)
         {
-            return m_luaHelper.CallFunction(funcName, args);
+            funcName = string.Format("{0}.{1}", m_luaInstanceName, funcName);
+
+            if (args.Length == 0)
+            {
+                return m_luaHelper.CallFunction(funcName, m_luaInstance);
+            }
+            else
+            {
+                // 采用class:func()调用形式，需要传递class实例。
+                object[] tempArgs = new object[args.Length + 1];
+                tempArgs[0] = m_luaInstance;
+                args.CopyTo(tempArgs, 1);
+                return m_luaHelper.CallFunction(funcName, tempArgs);
+            }
         }
 
         public LuaHelper GetLuaHelper()
         {
             return m_luaHelper;
+        }
+
+        public string GetLuaInstanceName()
+        {
+            return m_luaInstanceName;
         }
 
         // used to cache object for lua script.

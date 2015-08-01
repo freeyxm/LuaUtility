@@ -44,7 +44,25 @@ end
 
 function UI.OnClickConfirm()
 	Debug.Log("OnClickConfirm");
-	this:SendNotification(UI.Notify.Change_Text, "OnClickConfirm")
+	--this:SendNotification(UI.Notify.Change_Text, "OnClickConfirm")
+	UI:enterGame();
+end
+
+function UI.enterGame()
+	local args = {};
+	args.channel = "ShortConn";
+	args.equipmentMD5 = "";
+	args.skillpartMD5 = "";
+	args.achivementMD5 = "";
+	args.passiveSkillMD5 = "";
+	args.newhandMD5 = "";
+	IPlayerHandler:enterGame(args, UI.enterGameCallback);
+end
+
+function UI.enterGameCallback(player)
+	Debug.Log("enterGameCallback: ");
+	Debug.Log(Table2String(player));
+	this:SendNotification(UI.Notify.Change_Text, "Welcome! "..player.name);
 end
 
 function UI.OnClickCancel()
@@ -59,8 +77,6 @@ function UI.getPvp()
 end
 
 function UI.getPvpCallback(infor)
-	Debug.Log("enterGameCallback: ");
-	Debug.Log(infor);
-
+	Debug.Log("getPvpCallback: ");
 	Debug.Log(Table2String(infor));
 end

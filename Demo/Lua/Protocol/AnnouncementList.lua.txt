@@ -1,0 +1,31 @@
+ByteStreamWriter = luanet.import_type('UNetPkg.ByteStreamWriter')
+ByteStreamReader = luanet.import_type('UNetPkg.ByteStreamReader')
+NetManager = luanet.import_type('UNetPkg.NetManager')
+LuaNetMessage = luanet.import_type('LuaUtility.LuaNetMessage')
+
+RequireLua("Protocol/Announcement.lua");
+
+AnnouncementList = {};
+
+function AnnouncementList:new()
+	local o = {};
+	setmetatable(o, self);
+	self.__index = self;
+	return o;
+end
+
+function AnnouncementList:ToStruct(data)
+	local bsr = ByteStreamReader(data);
+	self:ToStructReader(bsr);
+	bsr:Dispose();
+end
+
+function AnnouncementList:ToStructReader(bsr)
+    local playersCount = bsr:ReadShort();
+	self.announcements = Object[playersCount];
+	for i = 0, playersCount-1, 1 do
+		local ann = Announcement:new();
+		ann:ToStructReader(bsr);
+		self.announcements[i] = ann.data;
+	end
+end

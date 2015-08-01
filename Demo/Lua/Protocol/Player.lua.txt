@@ -1,0 +1,58 @@
+ByteStreamWriter = luanet.import_type('UNetPkg.ByteStreamWriter')
+ByteStreamReader = luanet.import_type('UNetPkg.ByteStreamReader')
+NetManager = luanet.import_type('UNetPkg.NetManager')
+LuaNetMessage = luanet.import_type('LuaUtility.LuaNetMessage')
+
+Player = {};
+
+function Player:new()
+	local o = {};
+	setmetatable(o, self);
+	self.__index = self;
+	return o;
+end
+
+function Player:ToStruct(data)
+	local bsr = ByteStreamReader(data);
+	self:ToStructReader(bsr);
+	bsr:Dispose();
+end
+
+function Player:ToStructReader(bsr)
+	self.id = bsr:ReadInt();
+	self.name = bsr:ReadUTF8WithLength();
+	self.gender = bsr:ReadByte();
+	self.level = bsr:ReadInt();
+	self.exp = bsr:ReadLong();
+	self.power = bsr:ReadInt();
+	self.attrStoneAddedLife = bsr:ReadInt();
+	self.attrStoneAddedAttack = bsr:ReadInt();
+	self.attrStoneAddedDef = bsr:ReadInt();
+	self.attrStoneLifeNum = bsr:ReadInt();
+	self.attrStoneAttackNum = bsr:ReadInt();
+	self.attrStoneDefenseNum = bsr:ReadInt();
+	self.gold = bsr:ReadInt();
+	self.money = bsr:ReadInt();
+	self.bagcell = bsr:ReadInt();
+	self.sign = bsr:ReadUTF8WithLength();
+	self.arena5Reward = bsr:ReadBool();
+	self.inviteCode = bsr:ReadInt();
+	self.inviteCodeUsed = bsr:ReadInt();
+	self.inviteCount = bsr:ReadInt();
+	self.newGuidProgress = bsr:ReadUTF8WithLength();
+	self.funcGuidCoin = bsr:ReadByte();
+	self.vipLevel = bsr:ReadInt();
+	self.playerIcon = bsr:ReadInt();
+	self.freeTalkCount = bsr:ReadInt();
+	self.powerBoughtCount = bsr:ReadInt();
+	self.strengthRestoreTime = bsr:ReadLong();
+	self.militaryRankPoint = bsr:ReadInt();
+	self.xsGold = bsr:ReadInt();
+	self.spacetimePoint = bsr:ReadInt();
+	self.fusionPoint = bsr:ReadInt();
+	self.equipSoulPoint = bsr:ReadInt();
+	self.createRoleTime = bsr:ReadLong();
+	self.sevenActivityRewardStatue = bsr:ReadInt();
+	self.petFreeSummonTime = bsr:ReadLong();
+end
+

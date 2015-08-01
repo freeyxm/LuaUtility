@@ -1,0 +1,24 @@
+UIPanelManager = luanet.import_type('UIPanelManager')
+GameManager = luanet.import_type('GameManager')
+UIEventListener = luanet.import_type('UIEventListener')
+EventDelegate = luanet.import_type('EventDelegate')
+
+RequireLua("CommonImport.lua");
+
+UIBusinessActivityPanel1 = {};
+UIBusinessActivityPanel1.Notify = {};
+UIBusinessActivityPanel1.Notify.UpdateData = "UIBusinessActivityPanel1_UpdateData";
+
+function UIBusinessActivityPanel1:Awake()
+	--print("UIBusinessActivityPanel1 Awake()");
+
+	self.txtName = self.binder:GetObject("Label_item_title"):GetComponent("UILabel");
+	self.txtDesc = self.binder:GetObject("Label_content"):GetComponent("UILabel");
+end
+
+function UIBusinessActivityPanel1:UpdateData(data)
+	--print("UIBusinessActivityPanel1:UpdateData");
+
+	self.txtName.text = data.title;
+	self.txtDesc.text = data.desc;
+end

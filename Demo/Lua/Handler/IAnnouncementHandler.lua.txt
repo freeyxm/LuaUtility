@@ -1,0 +1,26 @@
+ByteStreamWriter = luanet.import_type('UNetPkg.ByteStreamWriter')
+ByteStreamReader = luanet.import_type('UNetPkg.ByteStreamReader')
+NetManager = luanet.import_type('UNetPkg.NetManager')
+LuaNetMessage = luanet.import_type('LuaUtility.LuaNetMessage')
+
+RequireLua("Protocol/AnnouncementList.lua");
+
+IAnnouncementHandler = {};
+
+-- args.type - byte
+-- callback: callback function.
+function IAnnouncementHandler:GetAnnouncements(args, class, callback)
+	local code = 25002;
+	local bsw = ByteStreamWriter();
+	bsw:WriteInt(code);
+	local data = bsw:GetBuffer();
+	bsw:Dispose();
+	
+	local msg = LuaNetMessage(code, data, function(rdata)
+		print("GetAnnouncements return.");
+		local infor = AnnouncementList:new();
+		infor:ToStruct(rdata);
+		callback(class, infor);
+	end);
+	NetManager.Instance:AddNetMessage(msg);
+end

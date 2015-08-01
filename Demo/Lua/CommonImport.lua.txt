@@ -8,6 +8,10 @@ Transform = luanet.import_type('UnityEngine.Transform')
 LuaHelper = luanet.import_type('LuaUtility.LuaHelper')
 LuaBinder = luanet.import_type('LuaUtility.LuaBinder')
 
+Object = luanet.import_type('System.Object')
 Debug = luanet.import_type('Debuger')
+Debuger = luanet.import_type('Debuger')
+UIUtility = luanet.import_type('UIUtility')
+GameManager = luanet.import_type('GameManager')
 
 RequireLua("Util/Table2String.lua");

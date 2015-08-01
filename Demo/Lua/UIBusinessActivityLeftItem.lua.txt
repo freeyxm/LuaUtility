@@ -1,0 +1,28 @@
+UIPanelManager = luanet.import_type('UIPanelManager')
+GameManager = luanet.import_type('GameManager')
+UIEventListener = luanet.import_type('UIEventListener')
+EventDelegate = luanet.import_type('EventDelegate')
+
+RequireLua("CommonImport.lua");
+
+UIBusinessActivityLeftItem = {};
+
+function UIBusinessActivityLeftItem:Awake()
+	--print("UIBusinessActivityLeftItem Awake()");
+
+	self.btnItem = self.binder:GetObject("LeftItem"):GetComponent("UIButton");
+	self.txtName = self.binder:GetObject("Label_name"):GetComponent("UILabel");
+
+	UIEventListener.Get(self.btnItem.gameObject).onClick = LuaHelper.VoidDelegate(function() self:OnClickItem(); end);
+end
+
+function UIBusinessActivityLeftItem:UpdateData(announcement, notify)
+	self.data = announcement;
+	self.clickNotify = notify;
+	self.txtName.text = announcement.title;
+end
+
+function UIBusinessActivityLeftItem:OnClickItem()
+	--print("OnClickItem "..self.data["id"]);
+	GameManager.Instance:SendNotification(self.clickNotify, self.data.id);
+end
