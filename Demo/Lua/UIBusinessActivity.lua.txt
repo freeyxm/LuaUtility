@@ -61,7 +61,7 @@ end
 function UIBusinessActivity:GetAnnouncements()
 	--print("GetAnnouncements ...");
 	local args = {};
-	IAnnouncementHandler:GetAnnouncements(args, self, self.GetAnnouncementsCallback);
+	IAnnouncementHandler:GetAnnouncements(args, function(result) self:GetAnnouncementsCallback(result); end);
 end
 
 function UIBusinessActivity:GetAnnouncementsCallback(result)
