@@ -12,7 +12,8 @@ namespace LuaUtility
         public string m_name;
         public string m_luaFile;
         public bool m_single = false; // 是否在当前Lua虚拟机内是唯一的？
-        public MonoBehaviour m_parentBinder; // 当绑定了该值时，此实例将共享m_parentBinder的Lua虚拟机。
+        public LuaUIDialogBase m_parentBinder1; // 当绑定了该值时，此实例将共享m_parentBinder的Lua环境。
+        public LuaBinder m_parentBinder2; // 当绑定了该值时，此实例将共享m_parentBinder的Lua环境。
         public GameObject[] m_gameObjects;
 
         protected LuaHelper m_luaHelper;
@@ -27,27 +28,16 @@ namespace LuaUtility
         {
             m_luaInstanceName = m_single ? m_name : string.Format("{0}_{1}", m_name, ++m_globalInstanceIndex); // 注意命名方式，防止重复。
 
-            m_luaHelper = null;
-            if (m_parentBinder != null)
+            // 由于C#没有多重继承，LuaBinder与LuaUIDialogBase不能实现为继承关系，只能逐一判断类型。
+            if (m_parentBinder1 != null)
             {
-                do
-                {
-                    // 由于C#没有多重继承，LuaBinder与LuaUIDialogBase不能实现为继承关系，只能逐一判断类型。
-                    LuaBinder binder = m_parentBinder as LuaBinder;
-                    if (binder != null)
-                    {
-                        m_luaHelper = binder.GetLuaHelper();
-                        break;
-                    }
-                    LuaUIDialogBase dialog = m_parentBinder as LuaUIDialogBase;
-                    if (dialog != null)
-                    {
-                        m_luaHelper = dialog.GetLuaHelper();
-                        break;
-                    }
-                } while (false);
+                m_luaHelper = m_parentBinder1.GetLuaHelper();
             }
-            if (m_luaHelper == null)
+            else if (m_parentBinder2 != null)
+            {
+                m_luaHelper = m_parentBinder2.GetLuaHelper();
+            }
+            else
             {
                 m_luaHelper = new LuaHelper(false);
             }
@@ -146,17 +136,9 @@ namespace LuaUtility
             funcName = string.Format("{0}.{1}", m_luaInstanceName, funcName);
 
             if (args.Length == 0)
-            {
                 return m_luaHelper.CallFunction(funcName, m_luaInstance);
-            }
             else
-            {
-                // 采用class:func()调用形式，需要传递class实例。
-                object[] tempArgs = new object[args.Length + 1];
-                tempArgs[0] = m_luaInstance;
-                args.CopyTo(tempArgs, 1);
-                return m_luaHelper.CallFunction(funcName, tempArgs);
-            }
+                return m_luaHelper.CallFunctionEA(funcName, m_luaInstance, args);
         }
 
         public LuaHelper GetLuaHelper()
@@ -167,6 +149,11 @@ namespace LuaUtility
         public string GetLuaInstanceName()
         {
             return m_luaInstanceName;
+        }
+
+        public object GetLuaInstance()
+        {
+            return m_luaInstance;
         }
 
         // used to cache object for lua script.

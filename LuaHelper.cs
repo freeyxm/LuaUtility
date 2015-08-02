@@ -123,20 +123,26 @@ namespace LuaUtility
         {
             LuaFunction func = GetFunction(funcName);
             if (func == null)
+            {
                 return null;
-            else if (args == null || args.Length <= 1 || !(args[args.Length - 1] is Array))
+            }
+            else if (args.Length <= 1 || !(args[args.Length - 1] is Array))
+            {
                 return func.Call(args);
+            }
             else
             {
-                int argsLen = args.Length - 1;
-                Array lastArray = args[argsLen] as Array;
+                int preArgsNum = args.Length - 1;
+                Array lastArray = args[preArgsNum] as Array;
                 if (lastArray.Length == 0)
+                {
                     return func.Call(args);
+                }
                 else
                 {
-                    object[] newArgs = new object[argsLen + lastArray.Length];
-                    Array.Copy(args, newArgs, argsLen);
-                    Array.Copy(lastArray, 0, newArgs, argsLen, lastArray.Length);
+                    object[] newArgs = new object[preArgsNum + lastArray.Length];
+                    Array.Copy(args, newArgs, preArgsNum);
+                    Array.Copy(lastArray, 0, newArgs, preArgsNum, lastArray.Length);
                     return func.Call(newArgs);
                 }
             }

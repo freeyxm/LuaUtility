@@ -22,10 +22,20 @@ end
 
 function AnnouncementList:ToStructReader(bsr)
     local playersCount = bsr:ReadShort();
+	
+	--[[
 	self.announcements = Object[playersCount];
 	for i = 0, playersCount-1, 1 do
 		local ann = Announcement:new();
 		ann:ToStructReader(bsr);
 		self.announcements[i] = ann.data;
+	end
+	--]]
+
+	self.announcements = {};
+	for i = 1, playersCount, 1 do
+		local ann = Announcement:new();
+		ann:ToStructReader(bsr);
+		self.announcements[i] = ann;
 	end
 end

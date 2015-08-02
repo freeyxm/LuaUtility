@@ -19,13 +19,14 @@ function Announcement:ToStruct(data)
 end
 
 function Announcement:ToStructReader(bsr)
-	--self.id = bsr:ReadInt();
-    --self.title = bsr:ReadUTF8WithLength();
-    --self.desc = bsr:ReadUTF8WithLength();
+	self.id = bsr:ReadInt();
+    self.title = bsr:ReadUTF8WithLength();
+    self.desc = bsr:ReadUTF8WithLength();
 
+	--[[
 	self.data = LuaHelper.CreateDictionary();
 	self.data["id"] = bsr:ReadInt();
 	self.data["title"] = bsr:ReadUTF8WithLength();
 	self.data["desc"] = bsr:ReadUTF8WithLength();
+	--]]
 end
-

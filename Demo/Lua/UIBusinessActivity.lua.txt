@@ -11,7 +11,7 @@ UIBusinessActivity.Notify = {};
 UIBusinessActivity.Notify.OnSelectItem = "UIBusinessActivity_OnSelectItem";
 
 function UIBusinessActivity:Awake()
-	print("UIBusinessActivity:Awake");
+	--print("UIBusinessActivity:Awake");
 	
 	self.itemGrid = self.binder:GetObject("LeftItemGrid"):GetComponent("UIGrid");
 	self.itemTemp = self.binder:GetObject("LeftItem");
@@ -19,14 +19,16 @@ function UIBusinessActivity:Awake()
 	self.btnClose = self.binder:GetObject("BtnClose"):GetComponent("UIButton");
 	self.btnRefresh = self.binder:GetObject("BtnRefresh"):GetComponent("UIButton");
 
-	self.panel1 = LuaHelper.GetLuaBinder(self.binder:GetObject("Panel1"), "UIBusinessActivityPanel1");
-
 	UIEventListener.Get(self.btnClose.gameObject).onClick = LuaHelper.VoidDelegate(function() self:OnClickClose(); end);
 	UIEventListener.Get(self.btnRefresh.gameObject).onClick = LuaHelper.VoidDelegate(function() self:GetAnnouncements(); end);
 end
 
 function UIBusinessActivity:Start()
-	--self:GetAnnouncements();
+	--print("UIBusinessActivity:Start");
+
+	local panel1 = LuaHelper.GetLuaBinder(self.binder:GetObject("Panel1"), "UIBusinessActivityPanel1");
+	self.panel1 = panel1;
+	self.panel1_Lua = panel1:GetLuaInstance();
 end
 
 function UIBusinessActivity:Mediator_Init(mediator)
@@ -46,53 +48,54 @@ function UIBusinessActivity:OnClickClose()
 end
 
 function UIBusinessActivity:OnSelectItem(id)
-	--print("OnSelectItem: "..id);
-	for i = 0, self.announceList.Length-1, 1  do
+	--print("OnSelectItem: " .. id);
+	for i = 1, #self.announceList, 1  do
 		local announcement = self.announceList[i];
 		if announcement.id == id then
+			--[[
 			local params = Object[1]
 			params[0] = announcement;
 			self.panel1:CallLuaFunction("UpdateData", params);
+			--]]
+			self.panel1_Lua:UpdateData(announcement);
 			break;
 		end
 	end
 end
 
 function UIBusinessActivity:GetAnnouncements()
-	--print("GetAnnouncements ...");
+	print("GetAnnouncements ...");
 	local args = {};
 	IAnnouncementHandler:GetAnnouncements(args, function(result) self:GetAnnouncementsCallback(result); end);
 end
 
 function UIBusinessActivity:GetAnnouncementsCallback(result)
-	--print("GetAnnouncementsCallback: ");
-	--print(Table2String(result));
+	print("GetAnnouncementsCallback: ");
+	print(Table2String(result));
 
 	self:UpdateItems(result.announcements);
 end
 
 function UIBusinessActivity:UpdateItems(announceList)
+	-- add test data
+	for i = 1, 3, 1 do
+		local data = Announcement:new();
+		data.id = 10110000 + i;
+		data.title = "title" .. i;
+		data.desc = "desc" .. i;
+		announceList[#announceList+1] = data;
+	end
+	
 	self.announceList = announceList;
 	local gridTran = self.itemGrid.transform;
 
 	UIUtility.ActiveChildren(gridTran, null, false);
 
-	--[[
-	self.announceList = Object[announceList.Length + 2];
-	announceList:CopyTo(self.announceList, 0);
-	for i = announceList.Length, self.announceList.Length-1, 1 do
-		self.announceList[i] = LuaHelper.CreateDictionary();
-		self.announceList[i].id = 10110000 + i;
-		self.announceList[i].title = "title" .. i;
-		self.announceList[i].desc = "desc" .. i;
-	end
-	--]]
-
 	local obj;
-	for i = 0, self.announceList.Length-1, 1  do
-		local announcement = self.announceList[i];
+	for i = 1, #announceList, 1  do
+		local announcement = announceList[i];
 
-		local index = i;
+		local index = i - 1;
 		if index < gridTran.childCount then
 			obj = gridTran:GetChild(index).gameObject;
 		else
@@ -102,12 +105,16 @@ function UIBusinessActivity:UpdateItems(announceList)
 		obj:SetActive(true);
 
 		local item = LuaHelper.GetLuaBinder(obj, "UIBusinessActivityLeftItem");
-		
+		local itemLua = item:GetLuaInstance();
+		itemLua:UpdateData(announcement, self.Notify.OnSelectItem);
+
+		--[[
+		-- call function in other lua machine.
 		local params = Object[2]
 		params[0] = announcement;
 		params[1] = self.Notify.OnSelectItem;
-
 		item:CallLuaFunction("UpdateData", params);
+		--]]
 	end
 
 	self.itemGrid.repositionNow = true;

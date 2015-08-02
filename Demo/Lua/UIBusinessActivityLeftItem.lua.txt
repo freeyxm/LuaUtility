@@ -26,3 +26,4 @@ function UIBusinessActivityLeftItem:OnClickItem()
 	--print("OnClickItem "..self.data["id"]);
 	GameManager.Instance:SendNotification(self.clickNotify, self.data.id);
 end
+
